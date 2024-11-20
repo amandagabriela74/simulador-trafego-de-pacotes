@@ -1,0 +1,9 @@
+# Ignorar dependências do Node.js
+backend/node_modules/
+frontend/node_modules/
+
+# Ignorar arquivos de estado ou configuração específicos
+backend/rede.json
+
+# Ignorar logs
+*.log
