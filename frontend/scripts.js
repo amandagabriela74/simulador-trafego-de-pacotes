@@ -45,6 +45,34 @@ async function adicionarDispositivo() {
   atualizarGrid();
 }
 
+async function enviarPacote() {
+  const origemX = parseInt(document.getElementById("origemX").value, 10);
+  const origemY = parseInt(document.getElementById("origemY").value, 10);
+  const destinoX = parseInt(document.getElementById("destinoX").value, 10);
+  const destinoY = parseInt(document.getElementById("destinoY").value, 10);
+
+  if (isNaN(origemX) || isNaN(origemY) || isNaN(destinoX) || isNaN(destinoY)) {
+    alert("Preencha todas as coordenadas corretamente.");
+    return;
+  }
+
+  const resposta = await fetch(`${API_URL}/rede/pacote`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      origem: { x: origemX, y: origemY },
+      destino: { x: destinoX, y: destinoY },
+    }),
+  });
+
+  const resultado = await resposta.json();
+  if (resposta.ok) {
+    alert(resultado.mensagem);
+  } else {
+    alert(`Erro: ${resultado.erro}`);
+  }
+}
+
 // Limpa a rede
 async function limparRede() {
   await fetch(`${API_URL}/rede`, { method: "DELETE" });

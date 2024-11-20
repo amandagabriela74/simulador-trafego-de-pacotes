@@ -56,6 +56,50 @@ app.post("/rede/dispositivo", (req, res) => {
   res.json({ mensagem: "Dispositivo adicionado com sucesso" });
 });
 
+// Endpoint para enviar pacotes
+app.post("/rede/pacote", (req, res) => {
+  const { origem, destino } = req.body;
+
+  if (
+    !origem ||
+    !destino ||
+    origem.x === undefined ||
+    origem.y === undefined ||
+    destino.x === undefined ||
+    destino.y === undefined
+  ) {
+    return res.status(400).json({ erro: "Dados inválidos" });
+  }
+
+  const dispositivoOrigem = rede[origem.x]?.[origem.y];
+  const dispositivoDestino = rede[destino.x]?.[destino.y];
+
+  if (!dispositivoOrigem || !dispositivoDestino) {
+    return res
+      .status(400)
+      .json({ erro: "Dispositivo não encontrado na origem ou no destino." });
+  }
+
+  // Obter os IPs
+  const ipOrigem = dispositivoOrigem.ip;
+  const ipDestino = dispositivoDestino.ip;
+
+  // Verificar se estão na mesma sub-rede (comparam os 3 primeiros octetos)
+  const subredeOrigem = ipOrigem.split(".").slice(0, 3).join(".");
+  const subredeDestino = ipDestino.split(".").slice(0, 3).join(".");
+
+  if (subredeOrigem === subredeDestino) {
+    return res.json({
+      mensagem: "Pacote enviado com sucesso diretamente. Mesma sub-rede.",
+    });
+  }
+
+  // Caso não estejam na mesma sub-rede
+  res.status(400).json({
+    erro: "Os dispositivos não estão na mesma sub-rede. Comunicação direta não é possível.",
+  });
+});
+
 // Endpoint para limpar a rede
 app.delete("/rede", (req, res) => {
   rede = [];
