@@ -1,0 +1,68 @@
+[
+  [
+    null,
+    null,
+    null,
+    {
+      "tipo": "roteador",
+      "ip": "3.3.3.3"
+    }
+  ],
+  null,
+  [
+    null,
+    null,
+    null,
+    null,
+    {
+      "tipo": "smartphone",
+      "ip": "1.1.1.1"
+    }
+  ],
+  null,
+  [
+    null,
+    null,
+    {
+      "tipo": "smartphone",
+      "ip": "8.8.8.8"
+    }
+  ],
+  [
+    null,
+    null,
+    null,
+    {
+      "tipo": "roteador",
+      "ip": "3.3.3.3"
+    }
+  ],
+  null,
+  null,
+  [
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    {
+      "tipo": "notebook",
+      "ip": "1"
+    }
+  ],
+  [
+    null,
+    null,
+    {
+      "tipo": "roteador",
+      "ip": "8.8.8.8"
+    },
+    {
+      "tipo": "notebook",
+      "ip": "3.3.3.3"
+    }
+  ]
+]

@@ -9,8 +9,23 @@ app.use(cors());
 
 const PORT = 3000;
 
+// Inicializa a rede com nulls, criando uma matriz 10x10
+function inicializarRede() {
+  const tamanho = 10;
+  let rede = [];
+
+  for (let i = 0; i < tamanho; i++) {
+    rede[i] = [];
+    for (let j = 0; j < tamanho; j++) {
+      rede[i][j] = null; // Inicializa cada célula com null
+    }
+  }
+
+  return rede;
+}
+
 // Carrega a rede salva (se existir)
-let rede = [];
+let rede = inicializarRede();
 const arquivoRede = "rede.json";
 
 if (fs.existsSync(arquivoRede)) {
@@ -49,5 +64,5 @@ app.delete("/rede", (req, res) => {
 });
 
 app.listen(PORT, () => {
-    console.log(`Servidor disponível em http://localhost:${PORT}`);
+  console.log(`Servidor disponível em http://localhost:${PORT}`);
 });

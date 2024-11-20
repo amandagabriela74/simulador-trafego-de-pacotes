@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Rede de Pacotes</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <h1>Rede de Pacotes</h1>
+    <div id="formulario">
+      <input type="text" id="ip" placeholder="Endereço IP" />
+      <select id="tipo">
+        <option value="smartphone">Smartphone</option>
+        <option value="notebook">Notebook</option>
+        <option value="roteador">Roteador</option>
+      </select>
+      <input type="number" id="x" placeholder="Linha" />
+      <input type="number" id="y" placeholder="Coluna" />
+      <button onclick="adicionarDispositivo()">Adicionar</button>
+      <button onclick="limparRede()">Limpar Rede</button>
+    </div>
+    <div class="grid" id="grid"></div>
+    <script src="scripts.js"></script>
+  </body>
+</html>
