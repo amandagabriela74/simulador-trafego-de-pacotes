@@ -34,10 +34,11 @@ async function atualizarGrid() {
 async function adicionarDispositivo() {
   const ip = document.getElementById("ip").value;
   const tipo = document.getElementById("tipo").value;
+  const mascara = document.getElementById("mascara").value;
   const x = parseInt(document.getElementById("x").value, 10);
   const y = parseInt(document.getElementById("y").value, 10);
 
-  if (!ip || !tipo || isNaN(x) || isNaN(y)) {
+  if (!ip || !tipo || !mascara || isNaN(x) || isNaN(y)) {
     alert("Preencha todos os campos corretamente.");
     return;
   }
@@ -45,7 +46,7 @@ async function adicionarDispositivo() {
   await fetch(`${API_URL}/rede/dispositivo`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ ip, tipo, x, y }),
+    body: JSON.stringify({ ip, tipo, mascara, x, y }),
   });
 
   atualizarGrid();
@@ -147,9 +148,6 @@ async function enviarPacote(origem, destino) {
     return;
   }
 
-  console.log("origem", origem);
-  console.log("destino", destino);
-
   // Verifique se estão na mesma rede
   const origemIp = getIpPorCoordenada(origem.x, origem.y);
   const destinoIp = getIpPorCoordenada(destino.x, destino.y);
@@ -159,25 +157,23 @@ async function enviarPacote(origem, destino) {
     return;
   }
 
-  // Verificar a mesma rede usando os três primeiros octetos
-  const mesmaRede =
-    origemIp.split(".").slice(0, 3).join(".") ===
-    destinoIp.split(".").slice(0, 3).join(".");
+  try {
+    const response = await fetch(`${API_URL}/rede/pacote`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ origem, destino, quantidade: 1 }), // Quantidade de pacotes (ajustar conforme sua lógica)
+    });
 
-  if (mesmaRede) {
-    alert("Os dispositivos estão na mesma rede. Comunicação direta!");
-    // Aqui você pode fazer o que for necessário com a comunicação direta, como animar os pacotes na interface
-  } else {
-    alert("Os dispositivos não estão na mesma rede. Comunicação por roteador.");
-    // Lógica de envio para roteador, se necessário
+    if (response.ok) {
+      const data = await response.json();
+      alert(data.mensagem); // Exibe a mensagem retornada pelo backend
+    } else {
+      const errorData = await response.json();
+      alert(errorData.erro || "Erro desconhecido");
+    }
+  } catch (error) {
+    alert("Erro ao enviar o pacote: " + error.message);
   }
-
-  // Aqui você faz o envio dos pacotes (a lógica que você já tem para o envio via fetch)
-  await fetch(`${API_URL}/rede/pacote`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ origem, destino, quantidade: 1 }), // Quantidade de pacotes (ajustar conforme sua lógica)
-  });
 }
 
 // Limpa a rede

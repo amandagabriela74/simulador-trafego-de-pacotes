@@ -44,22 +44,46 @@ app.get("/rede", (req, res) => {
 
 // Endpoint para adicionar um dispositivo à rede
 app.post("/rede/dispositivo", (req, res) => {
-  const { tipo, ip, x, y } = req.body;
+  const { tipo, ip, mascara, x, y } = req.body;
 
-  if (!tipo || !ip || x === undefined || y === undefined) {
+  if (!tipo || !ip || !mascara || x === undefined || y === undefined) {
     return res.status(400).json({ erro: "Dados inválidos" });
   }
 
   if (!rede[x]) rede[x] = [];
-  rede[x][y] = { tipo, ip };
+  rede[x][y] = { tipo, ip, mascara };
   salvarRede();
   res.json({ mensagem: "Dispositivo adicionado com sucesso" });
 });
+
+// Função para calcular a rede a partir do IP e da máscara
+function calcularRede(ip, mascara) {
+  const ipBinario = ip
+    .split(".")
+    .map((octeto) => parseInt(octeto, 10).toString(2).padStart(8, "0"))
+    .join(""); // Converte o IP para binário
+
+  const mascaraBinaria = "1".repeat(mascara) + "0".repeat(32 - mascara); // Máscara em binário
+
+  // Aplica operação AND bit a bit para calcular a rede
+  const redeBinaria = ipBinario
+    .split("")
+    .map((bit, index) =>
+      bit === "1" && mascaraBinaria[index] === "1" ? "1" : "0"
+    )
+    .join("");
+
+  // Converte a rede calculada para formato decimal (ex.: "192.168.1.0")
+  return Array.from({ length: 4 }, (_, i) =>
+    parseInt(redeBinaria.slice(i * 8, i * 8 + 8), 2)
+  ).join(".");
+}
 
 // Endpoint para enviar pacotes
 app.post("/rede/pacote", (req, res) => {
   const { origem, destino } = req.body;
 
+  // Validar entrada
   if (
     !origem ||
     !destino ||
@@ -80,15 +104,18 @@ app.post("/rede/pacote", (req, res) => {
       .json({ erro: "Dispositivo não encontrado na origem ou no destino." });
   }
 
-  // Obter os IPs
+  // Obter IPs e máscaras dos dispositivos
   const ipOrigem = dispositivoOrigem.ip;
   const ipDestino = dispositivoDestino.ip;
+  const mascaraOrigem = dispositivoOrigem.mascara || 24; // Assumir máscara padrão se não for especificada
+  const mascaraDestino = dispositivoDestino.mascara || 24;
 
-  // Verificar se estão na mesma sub-rede (comparam os 3 primeiros octetos)
-  const subredeOrigem = ipOrigem.split(".").slice(0, 3).join(".");
-  const subredeDestino = ipDestino.split(".").slice(0, 3).join(".");
+  // Calcular as redes de origem e destino
+  const redeOrigem = calcularRede(ipOrigem, mascaraOrigem);
+  const redeDestino = calcularRede(ipDestino, mascaraDestino);
 
-  if (subredeOrigem === subredeDestino) {
+  // Verificar se estão na mesma sub-rede
+  if (redeOrigem === redeDestino) {
     return res.json({
       mensagem: "Pacote enviado com sucesso diretamente. Mesma sub-rede.",
     });
@@ -96,7 +123,7 @@ app.post("/rede/pacote", (req, res) => {
 
   // Caso não estejam na mesma sub-rede
   res.status(400).json({
-    erro: "Os dispositivos não estão na mesma sub-rede. Comunicação direta não é possível.",
+    erro: "Os dispositivos não estão na mesma sub-rede. Comunicação direta não é possível. Necessário Roteador!",
   });
 });
 
