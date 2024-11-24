@@ -81,7 +81,7 @@ function calcularRede(ip, mascara) {
 
 // Endpoint para enviar pacotes
 app.post("/rede/pacote", (req, res) => {
-  const { origem, destino } = req.body;
+  const { origem, destino, quantidade } = req.body;
 
   // Validar entrada
   if (
@@ -90,7 +90,8 @@ app.post("/rede/pacote", (req, res) => {
     origem.x === undefined ||
     origem.y === undefined ||
     destino.x === undefined ||
-    destino.y === undefined
+    destino.y === undefined ||
+    !quantidade
   ) {
     return res.status(400).json({ erro: "Dados inválidos" });
   }
@@ -114,18 +115,91 @@ app.post("/rede/pacote", (req, res) => {
   const redeOrigem = calcularRede(ipOrigem, mascaraOrigem);
   const redeDestino = calcularRede(ipDestino, mascaraDestino);
 
+  const logPacotes = [];
   // Verificar se estão na mesma sub-rede
   if (redeOrigem === redeDestino) {
+    // Comunicação direta
+    for (let i = 1; i <= quantidade; i++) {
+      logPacotes.push({
+        etapa: `Pacote ${i}`,
+        rota: [
+          { tipo: "origem", x: origem.x, y: origem.y, ip: ipOrigem },
+          { tipo: "destino", x: destino.x, y: destino.y, ip: ipDestino },
+        ],
+      });
+    }
     return res.json({
-      mensagem: "Pacote enviado com sucesso diretamente. Mesma sub-rede.",
+      mensagem: `Todos os ${quantidade} pacotes foram enviados diretamente. Mesma sub-rede.`,
+      log: logPacotes,
+    });
+  } else {
+    // Comunicação via roteador
+    // Caso os dispositivos não estejam na mesma sub-rede, identificar roteadores
+    const roteadorOrigem = encontrarRoteadorMaisProximo(origem.x, origem.y);
+    const roteadorDestino = encontrarRoteadorMaisProximo(destino.x, destino.y);
+
+    if (!roteadorOrigem || !roteadorDestino) {
+      return res.status(400).json({
+        erro: "Não foi possível encontrar roteadores para realizar o envio.",
+      });
+    }
+
+    // Simular a passagem dos pacotes pelo roteador
+    for (let i = 1; i <= quantidade; i++) {
+      logPacotes.push({
+        etapa: `Pacote ${i}`,
+        rota: [
+          { tipo: "origem", x: origem.x, y: origem.y, ip: ipOrigem },
+          {
+            tipo: "roteador",
+            x: roteadorOrigem.x,
+            y: roteadorOrigem.y,
+            ip: roteadorOrigem.ip,
+          },
+          {
+            tipo: "roteador",
+            x: roteadorDestino.x,
+            y: roteadorDestino.y,
+            ip: roteadorDestino.ip,
+          },
+          { tipo: "destino", x: destino.x, y: destino.y, ip: ipDestino },
+        ],
+      });
+    }
+
+    return res.json({
+      mensagem: `Os ${quantidade} pacotes foram enviados via roteadores.`,
+      log: logPacotes,
     });
   }
 
   // Caso não estejam na mesma sub-rede
-  res.status(400).json({
+  /*   res.status(400).json({
     erro: "Os dispositivos não estão na mesma sub-rede. Comunicação direta não é possível. Necessário Roteador!",
-  });
+  }); */
 });
+
+// Função para encontrar o roteador mais próximo
+function encontrarRoteadorMaisProximo(x, y) {
+  let roteadorMaisProximo = null;
+  let menorDistancia = Infinity;
+
+  for (let i = 0; i < rede.length; i++) {
+    for (let j = 0; j < (rede[i]?.length || 0); j++) {
+      const dispositivo = rede[i]?.[j];
+      if (dispositivo?.tipo === "roteador") {
+        // Calcula a distância euclidiana
+        const distancia = Math.sqrt(Math.pow(x - i, 2) + Math.pow(y - j, 2));
+        if (distancia < menorDistancia) {
+          menorDistancia = distancia;
+          roteadorMaisProximo = dispositivo;
+        }
+      }
+    }
+  }
+
+  return roteadorMaisProximo;
+}
 
 // Endpoint para limpar a rede
 app.delete("/rede", (req, res) => {

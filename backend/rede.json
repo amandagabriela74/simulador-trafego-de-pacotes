@@ -19,7 +19,17 @@
       "mascara": "12"
     }
   ],
-  null,
+  [
+    null,
+    null,
+    null,
+    null,
+    {
+      "tipo": "roteador",
+      "ip": "192.5.4.3",
+      "mascara": "24"
+    }
+  ],
   [
     null,
     null,
@@ -33,6 +43,25 @@
     {
       "tipo": "smartphone",
       "ip": "1.1.1.2",
+      "mascara": "8"
+    }
+  ],
+  null,
+  null,
+  null,
+  null,
+  [
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    {
+      "tipo": "roteador",
+      "ip": "2.2.2.2",
       "mascara": "8"
     }
   ]

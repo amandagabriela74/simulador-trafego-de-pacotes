@@ -161,7 +161,7 @@ async function enviarPacote(origem, destino) {
     const response = await fetch(`${API_URL}/rede/pacote`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ origem, destino, quantidade: 1 }), // Quantidade de pacotes (ajustar conforme sua lógica)
+      body: JSON.stringify({ origem, destino, quantidade: 10 }), // Quantidade de pacotes (ajustar conforme sua lógica)
     });
 
     if (response.ok) {
