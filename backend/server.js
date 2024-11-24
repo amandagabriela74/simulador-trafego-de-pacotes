@@ -24,18 +24,32 @@ function inicializarRede() {
   return rede;
 }
 
+const arquivoRede = "rede.json";
+const arquivoRedesSalvas = "redesSalvas.json"; // Redes salvas
+
 // Carrega a rede salva (se existir)
 let rede = inicializarRede();
-const arquivoRede = "rede.json";
-
 if (fs.existsSync(arquivoRede)) {
   rede = JSON.parse(fs.readFileSync(arquivoRede, "utf8"));
+}
+
+// Carrega redes salvas ou inicializa
+let redesSalvas = [];
+if (fs.existsSync(arquivoRedesSalvas)) {
+  redesSalvas = JSON.parse(fs.readFileSync(arquivoRedesSalvas, "utf8"));
 }
 
 // Salva a rede no arquivo
 function salvarRede() {
   fs.writeFileSync(arquivoRede, JSON.stringify(rede, null, 2));
 }
+
+// Salva as redes salvas no arquivo
+function salvarRedesSalvas() {
+  fs.writeFileSync(arquivoRedesSalvas, JSON.stringify(redesSalvas, null, 2));
+}
+
+// =================== Endpoints =================== //
 
 // Endpoint para obter a rede atual
 app.get("/rede", (req, res) => {
@@ -56,28 +70,12 @@ app.post("/rede/dispositivo", (req, res) => {
   res.json({ mensagem: "Dispositivo adicionado com sucesso" });
 });
 
-// Função para calcular a rede a partir do IP e da máscara
-function calcularRede(ip, mascara) {
-  const ipBinario = ip
-    .split(".")
-    .map((octeto) => parseInt(octeto, 10).toString(2).padStart(8, "0"))
-    .join(""); // Converte o IP para binário
-
-  const mascaraBinaria = "1".repeat(mascara) + "0".repeat(32 - mascara); // Máscara em binário
-
-  // Aplica operação AND bit a bit para calcular a rede
-  const redeBinaria = ipBinario
-    .split("")
-    .map((bit, index) =>
-      bit === "1" && mascaraBinaria[index] === "1" ? "1" : "0"
-    )
-    .join("");
-
-  // Converte a rede calculada para formato decimal (ex.: "192.168.1.0")
-  return Array.from({ length: 4 }, (_, i) =>
-    parseInt(redeBinaria.slice(i * 8, i * 8 + 8), 2)
-  ).join(".");
-}
+// Endpoint para limpar a rede
+app.delete("/rede", (req, res) => {
+  rede = [];
+  salvarRede();
+  res.json({ mensagem: "Rede limpa com sucesso" });
+});
 
 // Endpoint para enviar pacotes
 app.post("/rede/pacote", (req, res) => {
@@ -179,6 +177,98 @@ app.post("/rede/pacote", (req, res) => {
   }); */
 });
 
+// =================== Redes Salvas =================== //
+
+// Endpoint para salvar a rede atual com um nome
+app.post("/rede/salvar", (req, res) => {
+  const { nome } = req.body;
+
+  if (!nome) {
+    return res.status(400).json({ erro: "Nome da rede é obrigatório." });
+  }
+
+  // Verificar se já existe uma rede com o mesmo nome
+  const redeExistente = redesSalvas.find((r) => r.nome === nome);
+  if (redeExistente) {
+    return res.status(400).json({ erro: "Já existe uma rede com este nome." });
+  }
+
+  // Adicionar a rede atual à lista de redes salvas
+  redesSalvas.push({ nome, rede });
+  salvarRedesSalvas();
+  res.json({ mensagem: "Rede salva com sucesso." });
+});
+
+// Endpoint para carregar uma rede salva
+app.get("/rede/carregar", (req, res) => {
+  const { nome } = req.query;
+
+  if (!nome) {
+    return res.status(400).json({ erro: "Nome da rede é obrigatório." });
+  }
+
+  // Encontrar a rede salva pelo nome
+  const redeSalva = redesSalvas.find((r) => r.nome === nome);
+  if (!redeSalva) {
+    return res.status(404).json({ erro: "Rede não encontrada." });
+  }
+
+  // Atualizar a rede atual com a rede salva
+  rede = redeSalva.rede;
+  salvarRede();
+  res.json({ mensagem: "Rede carregada com sucesso.", rede });
+});
+
+// Endpoint para listar todas as redes salvas
+app.get("/rede/listar", (req, res) => {
+  const nomesDasRedes = redesSalvas.map((r) => r.nome);
+  res.json(nomesDasRedes); // Retorna apenas os nomes das redes salvas
+});
+
+// Endpoint para excluir uma rede salva
+app.delete("/rede/excluir", (req, res) => {
+  const { nome } = req.body;
+
+  if (!nome) {
+    return res.status(400).json({ erro: "Nome da rede é obrigatório." });
+  }
+
+  const indice = redesSalvas.findIndex((r) => r.nome === nome);
+  if (indice === -1) {
+    return res.status(404).json({ erro: "Rede não encontrada." });
+  }
+
+  // Remover a rede salva
+  redesSalvas.splice(indice, 1);
+  salvarRedesSalvas();
+  res.json({ mensagem: "Rede excluída com sucesso." });
+});
+
+// =================== Funções auxiliares =================== //
+
+// Função para calcular a rede a partir do IP e da máscara
+function calcularRede(ip, mascara) {
+  const ipBinario = ip
+    .split(".")
+    .map((octeto) => parseInt(octeto, 10).toString(2).padStart(8, "0"))
+    .join(""); // Converte o IP para binário
+
+  const mascaraBinaria = "1".repeat(mascara) + "0".repeat(32 - mascara); // Máscara em binário
+
+  // Aplica operação AND bit a bit para calcular a rede
+  const redeBinaria = ipBinario
+    .split("")
+    .map((bit, index) =>
+      bit === "1" && mascaraBinaria[index] === "1" ? "1" : "0"
+    )
+    .join("");
+
+  // Converte a rede calculada para formato decimal (ex.: "192.168.1.0")
+  return Array.from({ length: 4 }, (_, i) =>
+    parseInt(redeBinaria.slice(i * 8, i * 8 + 8), 2)
+  ).join(".");
+}
+
 // Função para encontrar o roteador mais próximo
 function encontrarRoteadorMaisProximo(x, y) {
   let roteadorMaisProximo = null;
@@ -201,12 +291,7 @@ function encontrarRoteadorMaisProximo(x, y) {
   return roteadorMaisProximo;
 }
 
-// Endpoint para limpar a rede
-app.delete("/rede", (req, res) => {
-  rede = [];
-  salvarRede();
-  res.json({ mensagem: "Rede limpa com sucesso" });
-});
+// =================== Iniciar Servidor =================== //
 
 app.listen(PORT, () => {
   console.log(`Servidor disponível em http://localhost:${PORT}`);

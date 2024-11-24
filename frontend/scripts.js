@@ -51,6 +51,67 @@ async function adicionarDispositivo() {
 
   atualizarGrid();
 }
+
+// Salvar a configuração atual da rede com um nome
+async function salvarRede() {
+  const nome = prompt("Digite um nome para salvar a rede:");
+
+  if (!nome) {
+    alert("Você precisa fornecer um nome para salvar a rede.");
+    return;
+  }
+
+  const resposta = await fetch(`${API_URL}/rede/salvar`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ nome }),
+  });
+
+  if (resposta.ok) {
+    alert("Rede salva com sucesso!");
+  } else {
+    const erro = await resposta.json();
+    alert(`Erro ao salvar a rede: ${erro.erro}`);
+  }
+}
+
+// Listar redes salvas disponíveis
+async function listarRedesSalvas() {
+  const resposta = await fetch(`${API_URL}/rede/listar`);
+  const redes = await resposta.json();
+
+  const listaRedes = document.getElementById("listaRedes");
+  listaRedes.innerHTML = ""; // Limpa a lista antes de exibir
+
+  redes.forEach((nome) => {
+    const item = document.createElement("li");
+    item.textContent = nome;
+    item.onclick = () => carregarRede(nome); // Define evento para carregar a rede ao clicar
+    listaRedes.appendChild(item);
+  });
+}
+
+// Carregar uma rede salva pelo nome
+async function carregarRede(nome) {
+  const resposta = await fetch(
+    `${API_URL}/rede/carregar?nome=${encodeURIComponent(nome)}`
+  );
+  if (resposta.ok) {
+    const dados = await resposta.json();
+    alert("Rede carregada com sucesso!");
+    atualizarGrid(); // Atualiza a grade com a rede carregada
+  } else {
+    const erro = await resposta.json();
+    alert(`Erro ao carregar a rede: ${erro.erro}`);
+  }
+}
+
+// Limpa a rede atual
+async function limparRede() {
+  await fetch(`${API_URL}/rede`, { method: "DELETE" });
+  atualizarGrid();
+}
+
 // Inicializa a grade ao carregar a página
 criarGrade();
 
@@ -103,11 +164,6 @@ function configurarGridParaClique() {
       const y = parseInt(cell.dataset.y, 10); // Pega a coordenada y
 
       console.log("Coordenadas clicadas:", { x, y });
-
-      if (isNaN(x) || isNaN(y)) {
-        console.error("Coordenadas não atribuídas corretamente!");
-        return;
-      }
 
       if (!origemSelecionada) {
         // Se origem ainda não foi selecionada, seleciona a origem
@@ -174,10 +230,4 @@ async function enviarPacote(origem, destino) {
   } catch (error) {
     alert("Erro ao enviar o pacote: " + error.message);
   }
-}
-
-// Limpa a rede
-async function limparRede() {
-  await fetch(`${API_URL}/rede`, { method: "DELETE" });
-  atualizarGrid();
 }

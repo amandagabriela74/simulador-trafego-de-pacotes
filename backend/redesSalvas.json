@@ -1,0 +1,118 @@
+[
+  {
+    "nome": "redeteste",
+    "rede": [
+      null,
+      [
+        null,
+        {
+          "tipo": "smartphone",
+          "ip": "192.168.1.10",
+          "mascara": "24"
+        },
+        {
+          "tipo": "notebook",
+          "ip": "192.168.1.20",
+          "mascara": "24"
+        },
+        null,
+        {
+          "tipo": "smartphone",
+          "ip": "2.2.2.2",
+          "mascara": "12"
+        }
+      ],
+      [
+        null,
+        null,
+        null,
+        null,
+        {
+          "tipo": "roteador",
+          "ip": "192.5.4.3",
+          "mascara": "24"
+        }
+      ],
+      [
+        null,
+        null,
+        null,
+        null,
+        {
+          "tipo": "smartphone",
+          "ip": "2.2.2.2",
+          "mascara": "12"
+        },
+        {
+          "tipo": "smartphone",
+          "ip": "1.1.1.2",
+          "mascara": "8"
+        }
+      ],
+      null,
+      null,
+      null,
+      null,
+      [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        {
+          "tipo": "roteador",
+          "ip": "2.2.2.2",
+          "mascara": "8"
+        }
+      ]
+    ]
+  },
+  {
+    "nome": "redeX",
+    "rede": [
+      [
+        {
+          "tipo": "smartphone",
+          "ip": "3.3.3.3",
+          "mascara": "8"
+        }
+      ],
+      [
+        null,
+        null,
+        {
+          "tipo": "smartphone",
+          "ip": "3.3.3.1",
+          "mascara": "8"
+        }
+      ],
+      [
+        null,
+        {
+          "tipo": "notebook",
+          "ip": "3.3.3.2",
+          "mascara": "8"
+        }
+      ],
+      null,
+      [
+        null,
+        null,
+        null,
+        {
+          "tipo": "notebook",
+          "ip": "3.3.3.4",
+          "mascara": "8"
+        },
+        {
+          "tipo": "smartphone",
+          "ip": "3.3.3.4",
+          "mascara": "8"
+        }
+      ]
+    ]
+  }
+]
