@@ -7,7 +7,7 @@ const app = express();
 app.use(bodyParser.json());
 app.use(cors());
 
-const PORT = 3000;
+const PORT = 4000;
 
 // Inicializa a rede com nulls, criando uma matriz 10x10
 function inicializarRede() {
@@ -117,18 +117,24 @@ app.post("/rede/pacote", (req, res) => {
   // Verificar se estão na mesma sub-rede
   if (redeOrigem === redeDestino) {
     // Comunicação direta
+
+    const rota = calcularRota(origem, destino); // Calcula o caminho direto
+
     for (let i = 1; i <= quantidade; i++) {
       logPacotes.push({
         etapa: `Pacote ${i}`,
-        rota: [
-          { tipo: "origem", x: origem.x, y: origem.y, ip: ipOrigem },
-          { tipo: "destino", x: destino.x, y: destino.y, ip: ipDestino },
-        ],
+        rota: rota.map((ponto) => ({
+          tipo: ponto.tipo,
+          x: ponto.x,
+          y: ponto.y,
+          ip: ponto.ip,
+        })),
       });
     }
     return res.json({
       mensagem: `Todos os ${quantidade} pacotes foram enviados diretamente. Mesma sub-rede.`,
       log: logPacotes,
+      rota,
     });
   } else {
     // Comunicação via roteador
@@ -143,31 +149,23 @@ app.post("/rede/pacote", (req, res) => {
     }
 
     // Simular a passagem dos pacotes pelo roteador
+    const rota = calcularRota(origem, destino); // Função fictícia para determinar o caminho
     for (let i = 1; i <= quantidade; i++) {
       logPacotes.push({
         etapa: `Pacote ${i}`,
-        rota: [
-          { tipo: "origem", x: origem.x, y: origem.y, ip: ipOrigem },
-          {
-            tipo: "roteador",
-            x: roteadorOrigem.x,
-            y: roteadorOrigem.y,
-            ip: roteadorOrigem.ip,
-          },
-          {
-            tipo: "roteador",
-            x: roteadorDestino.x,
-            y: roteadorDestino.y,
-            ip: roteadorDestino.ip,
-          },
-          { tipo: "destino", x: destino.x, y: destino.y, ip: ipDestino },
-        ],
+        rota: rota.map((ponto) => ({
+          tipo: ponto.tipo,
+          x: ponto.x,
+          y: ponto.y,
+          ip: ponto.ip,
+        })),
       });
     }
 
     return res.json({
       mensagem: `Os ${quantidade} pacotes foram enviados via roteadores.`,
       log: logPacotes,
+      rota,
     });
   }
 
@@ -245,6 +243,35 @@ app.delete("/rede/excluir", (req, res) => {
 });
 
 // =================== Funções auxiliares =================== //
+
+function calcularRota(origem, destino, rede) {
+  const { x: xOrigem, y: yOrigem } = origem;
+  const { x: xDestino, y: yDestino } = destino;
+
+  // Para simplificar, vamos assumir uma rota em linha reta no momento
+  const rota = [];
+
+  // Trajeto horizontal (movendo no eixo X)
+  if (xOrigem !== xDestino) {
+    const passoX = xOrigem < xDestino ? 1 : -1;
+    for (let x = xOrigem; x !== xDestino; x += passoX) {
+      rota.push({ x, y: yOrigem }); // Mantém a mesma linha (y)
+    }
+  }
+
+  // Trajeto vertical (movendo no eixo Y)
+  if (yOrigem !== yDestino) {
+    const passoY = yOrigem < yDestino ? 1 : -1;
+    for (let y = yOrigem; y !== yDestino; y += passoY) {
+      rota.push({ x: xDestino, y }); // Alinha no eixo x já ajustado
+    }
+  }
+
+  // Adiciona o destino como último ponto
+  rota.push(destino);
+
+  return rota;
+}
 
 // Função para calcular a rede a partir do IP e da máscara
 function calcularRede(ip, mascara) {

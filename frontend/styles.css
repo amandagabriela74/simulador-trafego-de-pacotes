@@ -53,3 +53,20 @@ body {
   border: 2px solid red;
   background-color: lightcoral;
 }
+
+/* Estilo para o pacote animado */
+.pacote {
+  animation: pacoteTrajeto 1s linear forwards;
+  background-color: yellow;
+  color: black;
+}
+
+/* Animação do trajeto (ajuste para corresponder ao grid) */
+@keyframes pacoteTrajeto {
+  from {
+    opacity: 0.5;
+  }
+  to {
+    opacity: 1;
+  }
+}

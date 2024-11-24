@@ -1,4 +1,4 @@
-const API_URL = "http://localhost:3000";
+const API_URL = "http://localhost:4000";
 
 // Atualiza a grade com base na rede
 async function atualizarGrid() {
@@ -222,12 +222,31 @@ async function enviarPacote(origem, destino) {
 
     if (response.ok) {
       const data = await response.json();
-      alert(data.mensagem); // Exibe a mensagem retornada pelo backend
+      animarTrajetoPacote(data.rota);
+      alert(data.mensagem);
     } else {
       const errorData = await response.json();
       alert(errorData.erro || "Erro desconhecido");
     }
   } catch (error) {
     alert("Erro ao enviar o pacote: " + error.message);
+  }
+}
+
+
+async function animarTrajetoPacote(rota) {
+  const grid = document.getElementById("grid");
+
+  for (const passo of rota) {
+    const { x, y } = passo;
+
+    const index = x * 10 + y;
+    const cell = grid.children[index];
+
+    if (cell) {
+      cell.classList.add("pacote"); // Adiciona a classe de animação
+      await new Promise((resolve) => setTimeout(resolve, 500)); // Aguardar 500ms para cada passo
+      cell.classList.remove("pacote"); // Remove a classe após o passo
+    }
   }
 }
