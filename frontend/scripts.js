@@ -12,16 +12,22 @@ async function atualizarGrid() {
     for (let j = 0; j < 10; j++) {
       const cell = document.createElement("div");
       cell.className = "cell vazio";
+      cell.dataset.x = i; // Adiciona a coordenada x
+      cell.dataset.y = j; // Adiciona a coordenada y
 
       if (rede[i] && rede[i][j]) {
         const dispositivo = rede[i][j];
-        cell.className = dispositivo.tipo; // Correção: não usar interpolação aqui
+        cell.className = dispositivo.tipo;
         cell.innerText = dispositivo.tipo;
+        cell.dataset.ip = dispositivo.ip; // Atributo data-ip para armazenar o IP
       }
 
       grid.appendChild(cell);
     }
   }
+
+  // Após criar a grade, configura os cliques
+  configurarGridParaClique();
 }
 
 // Adiciona um dispositivo na rede
@@ -44,33 +50,134 @@ async function adicionarDispositivo() {
 
   atualizarGrid();
 }
+// Inicializa a grade ao carregar a página
+criarGrade();
 
-async function enviarPacote() {
-  const origemX = parseInt(document.getElementById("origemX").value, 10);
-  const origemY = parseInt(document.getElementById("origemY").value, 10);
-  const destinoX = parseInt(document.getElementById("destinoX").value, 10);
-  const destinoY = parseInt(document.getElementById("destinoY").value, 10);
+// Função para criar a grade 10x10
+function criarGrade() {
+  const grid = document.getElementById("grid");
 
-  if (isNaN(origemX) || isNaN(origemY) || isNaN(destinoX) || isNaN(destinoY)) {
-    alert("Preencha todas as coordenadas corretamente.");
+  // Garante que a grade seja limpa antes de adicionar novas células
+  grid.innerHTML = "";
+
+  for (let i = 0; i < 10; i++) {
+    for (let j = 0; j < 10; j++) {
+      const cell = document.createElement("div");
+      cell.classList.add("cell");
+      cell.dataset.x = i; // Definindo a coordenada x
+      cell.dataset.y = j; // Definindo a coordenada y
+
+      // Adiciona a célula na grid
+      grid.appendChild(cell);
+    }
+  }
+
+  // Após criar a grade, chama a função de atualizar a grade com dados da API
+  atualizarGrid();
+}
+
+// Variável para armazenar a origem selecionada
+let origemSelecionada = null;
+
+function getIpPorCoordenada(x, y) {
+  const grid = document.getElementById("grid");
+  const index = x * 10 + y; // Calcula o índice com base nas coordenadas
+  const cell = grid.children[index];
+
+  if (cell && cell.dataset.ip) {
+    return cell.dataset.ip; // Retorna o valor do atributo data-ip
+  }
+  return null;
+}
+
+// Função para configurar os cliques na grid
+function configurarGridParaClique() {
+  const grid = document.getElementById("grid");
+  const cells = grid.children; // Captura todas as células da grid
+
+  for (let cell of cells) {
+    cell.addEventListener("click", () => {
+      // Pega as coordenadas x e y da célula clicada
+      const x = parseInt(cell.dataset.x, 10); // Pega a coordenada x
+      const y = parseInt(cell.dataset.y, 10); // Pega a coordenada y
+
+      console.log("Coordenadas clicadas:", { x, y });
+
+      if (isNaN(x) || isNaN(y)) {
+        console.error("Coordenadas não atribuídas corretamente!");
+        return;
+      }
+
+      if (!origemSelecionada) {
+        // Se origem ainda não foi selecionada, seleciona a origem
+        origemSelecionada = { x, y };
+        cell.classList.add("origem"); // Marca a célula como origem
+      } else {
+        // Se origem já foi selecionada, marca como destino e envia o pacote
+        const destino = { x, y };
+        cell.classList.add("destino"); // Marca a célula como destino
+
+        // Enviar o pacote entre origem e destino
+        enviarPacote(origemSelecionada, destino);
+
+        // Resetar origemSelecionada após o envio do pacote
+        origemSelecionada = null;
+
+        // Limpar seleção visual após um tempo
+        setTimeout(() => {
+          limparSelecaoVisual();
+        }, 2000); // Tempo para limpar as seleções visuais
+      }
+    });
+  }
+}
+
+// Função para limpar a seleção visual
+function limparSelecaoVisual() {
+  const cells = document.querySelectorAll(".cell");
+  cells.forEach((cell) => {
+    cell.classList.remove("origem");
+    cell.classList.remove("destino");
+  });
+}
+
+async function enviarPacote(origem, destino) {
+  if (!origem || !destino) {
+    alert("Selecione tanto a origem quanto o destino.");
     return;
   }
 
-  const resposta = await fetch(`${API_URL}/rede/pacote`, {
+  console.log("origem", origem);
+  console.log("destino", destino);
+
+  // Verifique se estão na mesma rede
+  const origemIp = getIpPorCoordenada(origem.x, origem.y);
+  const destinoIp = getIpPorCoordenada(destino.x, destino.y);
+
+  if (!origemIp || !destinoIp) {
+    alert("Endereço IP não encontrado.");
+    return;
+  }
+
+  // Verificar a mesma rede usando os três primeiros octetos
+  const mesmaRede =
+    origemIp.split(".").slice(0, 3).join(".") ===
+    destinoIp.split(".").slice(0, 3).join(".");
+
+  if (mesmaRede) {
+    alert("Os dispositivos estão na mesma rede. Comunicação direta!");
+    // Aqui você pode fazer o que for necessário com a comunicação direta, como animar os pacotes na interface
+  } else {
+    alert("Os dispositivos não estão na mesma rede. Comunicação por roteador.");
+    // Lógica de envio para roteador, se necessário
+  }
+
+  // Aqui você faz o envio dos pacotes (a lógica que você já tem para o envio via fetch)
+  await fetch(`${API_URL}/rede/pacote`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      origem: { x: origemX, y: origemY },
-      destino: { x: destinoX, y: destinoY },
-    }),
+    body: JSON.stringify({ origem, destino, quantidade: 1 }), // Quantidade de pacotes (ajustar conforme sua lógica)
   });
-
-  const resultado = await resposta.json();
-  if (resposta.ok) {
-    alert(resultado.mensagem);
-  } else {
-    alert(`Erro: ${resultado.erro}`);
-  }
 }
 
 // Limpa a rede
@@ -78,6 +185,3 @@ async function limparRede() {
   await fetch(`${API_URL}/rede`, { method: "DELETE" });
   atualizarGrid();
 }
-
-// Inicializa a interface
-atualizarGrid();
