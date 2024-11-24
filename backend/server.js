@@ -51,12 +51,10 @@ function salvarRedesSalvas() {
 
 // =================== Endpoints =================== //
 
-// Endpoint para obter a rede atual
 app.get("/rede", (req, res) => {
   res.json(rede);
 });
 
-// Endpoint para adicionar um dispositivo à rede
 app.post("/rede/dispositivo", (req, res) => {
   const { tipo, ip, mascara, x, y } = req.body;
 
@@ -70,14 +68,12 @@ app.post("/rede/dispositivo", (req, res) => {
   res.json({ mensagem: "Dispositivo adicionado com sucesso" });
 });
 
-// Endpoint para limpar a rede
 app.delete("/rede", (req, res) => {
   rede = [];
   salvarRede();
   res.json({ mensagem: "Rede limpa com sucesso" });
 });
 
-// Endpoint para enviar pacotes
 app.post("/rede/pacote", (req, res) => {
   const { origem, destino, quantidade } = req.body;
 
@@ -168,16 +164,10 @@ app.post("/rede/pacote", (req, res) => {
       rota,
     });
   }
-
-  // Caso não estejam na mesma sub-rede
-  /*   res.status(400).json({
-    erro: "Os dispositivos não estão na mesma sub-rede. Comunicação direta não é possível. Necessário Roteador!",
-  }); */
 });
 
 // =================== Redes Salvas =================== //
 
-// Endpoint para salvar a rede atual com um nome
 app.post("/rede/salvar", (req, res) => {
   const { nome } = req.body;
 
@@ -197,7 +187,6 @@ app.post("/rede/salvar", (req, res) => {
   res.json({ mensagem: "Rede salva com sucesso." });
 });
 
-// Endpoint para carregar uma rede salva
 app.get("/rede/carregar", (req, res) => {
   const { nome } = req.query;
 
@@ -217,13 +206,11 @@ app.get("/rede/carregar", (req, res) => {
   res.json({ mensagem: "Rede carregada com sucesso.", rede });
 });
 
-// Endpoint para listar todas as redes salvas
 app.get("/rede/listar", (req, res) => {
   const nomesDasRedes = redesSalvas.map((r) => r.nome);
   res.json(nomesDasRedes); // Retorna apenas os nomes das redes salvas
 });
 
-// Endpoint para excluir uma rede salva
 app.delete("/rede/excluir", (req, res) => {
   const { nome } = req.body;
 
@@ -273,7 +260,6 @@ function calcularRota(origem, destino, rede) {
   return rota;
 }
 
-// Função para calcular a rede a partir do IP e da máscara
 function calcularRede(ip, mascara) {
   const ipBinario = ip
     .split(".")
@@ -296,7 +282,6 @@ function calcularRede(ip, mascara) {
   ).join(".");
 }
 
-// Função para encontrar o roteador mais próximo
 function encontrarRoteadorMaisProximo(x, y) {
   let roteadorMaisProximo = null;
   let menorDistancia = Infinity;
