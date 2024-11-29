@@ -96,7 +96,7 @@ app.post("/rede/pacote", (req, res) => {
   }
 
   try {
-    const rota = calcularRota(origem, destino, rede);
+    const { rota, tipoDeEnvio } = calcularRota(origem, destino, rede);
     const logPacotes = Array.from({ length: quantidade }, (_, i) => ({
       etapa: `Pacote ${i + 1}`,
       rota,
@@ -105,6 +105,7 @@ app.post("/rede/pacote", (req, res) => {
     res.json({
       mensagem: `Os ${quantidade} pacotes foram enviados com sucesso.`,
       log: logPacotes,
+      tipoDeEnvio,
       rota,
     });
   } catch (erro) {
@@ -118,10 +119,12 @@ function calcularRota(origem, destino, rede) {
   const { x: xDestino, y: yDestino } = destino;
 
   const rota = [{ x: xOrigem, y: yOrigem }];
+  let tipoDeEnvio;
 
   if (rede[xOrigem][yOrigem]?.mascara === rede[xDestino][yDestino]?.mascara) {
     // Rota direta célula por célula
     adicionarRotaLinear(rota, xOrigem, yOrigem, xDestino, yDestino);
+    tipoDeEnvio = "mesma rede";
   } else {
     // Busca os roteadores mais próximos
     const roteadorOrigem = encontrarRoteadorMaisProximo(xOrigem, yOrigem);
@@ -134,9 +137,11 @@ function calcularRota(origem, destino, rede) {
       adicionarRotaLinear(rota, roteadorOrigem.x, roteadorOrigem.y, roteadorDestino.x, roteadorDestino.y);
     }
     adicionarRotaLinear(rota, roteadorDestino.x, roteadorDestino.y, xDestino, yDestino);
+  
+    tipoDeEnvio = "via roteador";
   }
 
-  return rota;
+  return { rota, tipoDeEnvio };
 }
 
 // Adiciona a rota célula por célula de forma linear (sem movimentos diagonais)
@@ -175,6 +180,8 @@ function encontrarRoteadorMaisProximo(x, y) {
       }
     }
   }
+
+  console.log('roteadorMaisProximo', roteadorMaisProximo)
 
   return roteadorMaisProximo;
 }
