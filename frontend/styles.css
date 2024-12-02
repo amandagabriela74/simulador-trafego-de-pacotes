@@ -33,11 +33,17 @@ body {
 }
 
 .notebook {
-  background-color: #d4edda;
+  background-color: #b4ffc6;
 }
 
 .roteador {
   background-color: #f8d7da;
+}
+
+.smartphone, .notebook, .roteador{
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .vazio {
@@ -69,4 +75,13 @@ body {
   to {
     opacity: 1;
   }
+}
+
+
+
+
+.icon {
+  width: 30px; /* Ajuste conforme necessário */
+  height: 30px;
+  object-fit: contain; /* Garante que a imagem mantenha sua proporção */
 }

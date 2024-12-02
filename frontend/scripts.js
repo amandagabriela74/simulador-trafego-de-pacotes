@@ -12,14 +12,25 @@ async function atualizarGrid() {
     for (let j = 0; j < 10; j++) {
       const cell = document.createElement("div");
       cell.className = "cell vazio";
-      cell.dataset.x = i; // Adiciona a coordenada x
-      cell.dataset.y = j; // Adiciona a coordenada y
+      cell.dataset.x = i;
+      cell.dataset.y = j;
 
       if (rede[i] && rede[i][j]) {
         const dispositivo = rede[i][j];
+
         cell.className = dispositivo.tipo;
-        cell.innerText = dispositivo.tipo;
-        cell.dataset.ip = dispositivo.ip; // Atributo data-ip para armazenar o IP
+
+        // Cria um elemento <img> para exibir a imagem correspondente ao tipo
+        const img = document.createElement("img");
+        img.alt = dispositivo.tipo;
+        img.className = "icon";
+        img.src = `./assets/img/${dispositivo.tipo}.png`;
+
+        // Adiciona a imagem à célula
+        cell.appendChild(img);
+
+        // Adiciona o IP como um atributo data-ip
+        cell.dataset.ip = dispositivo.ip;
       }
 
       grid.appendChild(cell);
@@ -232,7 +243,6 @@ async function enviarPacote(origem, destino) {
     alert("Erro ao enviar o pacote: " + error.message);
   }
 }
-
 
 async function animarTrajetoPacote(rota) {
   const grid = document.getElementById("grid");
