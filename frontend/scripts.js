@@ -190,11 +190,6 @@ function configurarGridParaClique() {
 
         // Resetar origemSelecionada após o envio do pacote
         origemSelecionada = null;
-
-        // Limpar seleção visual após um tempo
-        setTimeout(() => {
-          limparSelecaoVisual();
-        }, 2000); // Tempo para limpar as seleções visuais
       }
     });
   }
@@ -202,11 +197,11 @@ function configurarGridParaClique() {
 
 // Função para limpar a seleção visual
 function limparSelecaoVisual() {
-  const cells = document.querySelectorAll(".cell");
-  cells.forEach((cell) => {
-    cell.classList.remove("origem");
-    cell.classList.remove("destino");
-  });
+  const origem = document.querySelector(".origem");
+  const destino = document.querySelector(".destino");
+
+  if (origem) origem.classList.remove("origem");
+  if (destino) destino.classList.remove("destino");
 }
 
 async function enviarPacote(origem, destino) {
@@ -259,4 +254,7 @@ async function animarTrajetoPacote(rota) {
       cell.classList.remove("pacote"); // Remove a classe após o passo
     }
   }
+
+   // Limpar seleções visuais (origem e destino) após a animação
+   limparSelecaoVisual();
 }
