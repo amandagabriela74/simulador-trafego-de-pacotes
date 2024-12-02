@@ -1,6 +1,35 @@
 const API_URL = "http://localhost:4000";
 
-// Atualiza a grade com base na rede
+// =========================== Funções de Inicialização =========================== //
+
+// Função principal para criar e inicializar a grade 10 X 10
+function criarGrade() {
+  const grid = document.getElementById("grid");
+
+  grid.innerHTML = "";
+
+  for (let i = 0; i < 10; i++) {
+    for (let j = 0; j < 10; j++) {
+      const cell = document.createElement("div");
+      cell.classList.add("cell");
+      cell.dataset.x = i; 
+      cell.dataset.y = j;
+
+      // Adiciona a célula na grid
+      grid.appendChild(cell);
+    }
+  }
+
+  // Após criar a grade, chama a função de atualizar a grade com dados da API
+  atualizarGrid();
+}
+
+// Inicializa a grade ao carregar a página
+criarGrade();
+
+// =========================== Consumo de Endpoints =========================== //
+
+// Atualiza a grade com os dispositivos recebidos da API
 async function atualizarGrid() {
   const grid = document.getElementById("grid");
   grid.innerHTML = "";
@@ -92,12 +121,12 @@ async function listarRedesSalvas() {
   const redes = await resposta.json();
 
   const listaRedes = document.getElementById("listaRedes");
-  listaRedes.innerHTML = ""; // Limpa a lista antes de exibir
+  listaRedes.innerHTML = "";
 
   redes.forEach((nome) => {
     const item = document.createElement("li");
     item.textContent = nome;
-    item.onclick = () => carregarRede(nome); // Define evento para carregar a rede ao clicar
+    item.onclick = () => carregarRede(nome);
     listaRedes.appendChild(item);
   });
 }
@@ -110,7 +139,7 @@ async function carregarRede(nome) {
   if (resposta.ok) {
     const dados = await resposta.json();
     alert("Rede carregada com sucesso!");
-    atualizarGrid(); // Atualiza a grade com a rede carregada
+    atualizarGrid();
   } else {
     const erro = await resposta.json();
     alert(`Erro ao carregar a rede: ${erro.erro}`);
@@ -123,47 +152,11 @@ async function limparRede() {
   atualizarGrid();
 }
 
-// Inicializa a grade ao carregar a página
-criarGrade();
+// =========================== Controle do Grid =========================== //
 
-// Função para criar a grade 10x10
-function criarGrade() {
-  const grid = document.getElementById("grid");
-
-  // Garante que a grade seja limpa antes de adicionar novas células
-  grid.innerHTML = "";
-
-  for (let i = 0; i < 10; i++) {
-    for (let j = 0; j < 10; j++) {
-      const cell = document.createElement("div");
-      cell.classList.add("cell");
-      cell.dataset.x = i; // Definindo a coordenada x
-      cell.dataset.y = j; // Definindo a coordenada y
-
-      // Adiciona a célula na grid
-      grid.appendChild(cell);
-    }
-  }
-
-  // Após criar a grade, chama a função de atualizar a grade com dados da API
-  atualizarGrid();
-}
-
-// Variável para armazenar a origem selecionada
 let origemSelecionada = null;
 
-function getIpPorCoordenada(x, y) {
-  const grid = document.getElementById("grid");
-  const index = x * 10 + y; // Calcula o índice com base nas coordenadas
-  const cell = grid.children[index];
-
-  if (cell && cell.dataset.ip) {
-    return cell.dataset.ip; // Retorna o valor do atributo data-ip
-  }
-  return null;
-}
-
-// Função para configurar os cliques na grid
+// Configura os cliques na grade
 function configurarGridParaClique() {
   const grid = document.getElementById("grid");
   const cells = grid.children; // Captura todas as células da grid
@@ -204,6 +197,21 @@ function limparSelecaoVisual() {
   if (destino) destino.classList.remove("destino");
 }
 
+// =========================== Envio de Pacotes =========================== //
+
+// Obtém o IP com base nas coordenadas
+function getIpPorCoordenada(x, y) {
+  const grid = document.getElementById("grid");
+  const index = x * 10 + y; // Calcula o índice com base nas coordenadas
+  const cell = grid.children[index];
+
+  if (cell && cell.dataset.ip) {
+    return cell.dataset.ip; // Retorna o valor do atributo data-ip
+  }
+  return null;
+}
+
+// Envia o pacote entre origem e destino
 async function enviarPacote(origem, destino) {
   if (!origem || !destino) {
     alert("Selecione tanto a origem quanto o destino.");
@@ -239,6 +247,7 @@ async function enviarPacote(origem, destino) {
   }
 }
 
+// Anima o trajeto do pacote na grade
 async function animarTrajetoPacote(rota) {
   const grid = document.getElementById("grid");
 
@@ -255,6 +264,6 @@ async function animarTrajetoPacote(rota) {
     }
   }
 
-   // Limpar seleções visuais (origem e destino) após a animação
-   limparSelecaoVisual();
+  // Limpar seleções visuais (origem e destino) após a animação
+  limparSelecaoVisual();
 }
