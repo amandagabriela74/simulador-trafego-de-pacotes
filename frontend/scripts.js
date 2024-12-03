@@ -24,7 +24,6 @@ function criarGrade() {
   atualizarGrid();
 }
 
-// Inicializa a grade ao carregar a página
 criarGrade();
 
 // =========================== Consumo de Endpoints =========================== //

@@ -113,6 +113,60 @@ app.post("/rede/pacote", (req, res) => {
   }
 });
 
+app.post("/rede/salvar", (req, res) => {
+  const { nome } = req.body;
+  if (!nome) {
+    return res.status(400).json({ erro: "Nome da rede é obrigatório." });
+  }
+  // Verificar se já existe uma rede com o mesmo nome
+  const redeExistente = redesSalvas.find((r) => r.nome === nome);
+  if (redeExistente) {
+    return res.status(400).json({ erro: "Já existe uma rede com este nome." });
+  }
+  // Adicionar a rede atual à lista de redes salvas
+  redesSalvas.push({ nome, rede });
+  salvarRedesSalvas();
+  res.json({ mensagem: "Rede salva com sucesso." });
+});
+
+app.get("/rede/carregar", (req, res) => {
+  const { nome } = req.query;
+  if (!nome) {
+    return res.status(400).json({ erro: "Nome da rede é obrigatório." });
+  }
+  // Encontrar a rede salva pelo nome
+  const redeSalva = redesSalvas.find((r) => r.nome === nome);
+  if (!redeSalva) {
+    return res.status(404).json({ erro: "Rede não encontrada." });
+  }
+  // Atualizar a rede atual com a rede salva
+  rede = redeSalva.rede;
+  salvarRede();
+  res.json({ mensagem: "Rede carregada com sucesso.", rede });
+});
+
+app.get("/rede/listar", (req, res) => {
+  const nomesDasRedes = redesSalvas.map((r) => r.nome);
+  res.json(nomesDasRedes);
+});
+
+app.delete("/rede/excluir", (req, res) => {
+  const { nome } = req.body;
+  if (!nome) {
+    return res.status(400).json({ erro: "Nome da rede é obrigatório." });
+  }
+  const indice = redesSalvas.findIndex((r) => r.nome === nome);
+  if (indice === -1) {
+    return res.status(404).json({ erro: "Rede não encontrada." });
+  }
+  // Remover a rede salva
+  redesSalvas.splice(indice, 1);
+  salvarRedesSalvas();
+  res.json({ mensagem: "Rede excluída com sucesso." });
+});
+
+// =================== Funções auxiliares =================== //
+
 // Calcula a rota célula por célula entre origem e destino
 function calcularRota(origem, destino, rede) {
   const { x: xOrigem, y: yOrigem } = origem;
@@ -131,13 +185,31 @@ function calcularRota(origem, destino, rede) {
     const roteadorDestino = encontrarRoteadorMaisProximo(xDestino, yDestino);
 
     if (roteadorOrigem) {
-      adicionarRotaLinear(rota, xOrigem, yOrigem, roteadorOrigem.x, roteadorOrigem.y);
+      adicionarRotaLinear(
+        rota,
+        xOrigem,
+        yOrigem,
+        roteadorOrigem.x,
+        roteadorOrigem.y
+      );
     }
     if (roteadorDestino && roteadorDestino !== roteadorOrigem) {
-      adicionarRotaLinear(rota, roteadorOrigem.x, roteadorOrigem.y, roteadorDestino.x, roteadorDestino.y);
+      adicionarRotaLinear(
+        rota,
+        roteadorOrigem.x,
+        roteadorOrigem.y,
+        roteadorDestino.x,
+        roteadorDestino.y
+      );
     }
-    adicionarRotaLinear(rota, roteadorDestino.x, roteadorDestino.y, xDestino, yDestino);
-  
+    adicionarRotaLinear(
+      rota,
+      roteadorDestino.x,
+      roteadorDestino.y,
+      xDestino,
+      yDestino
+    );
+
     tipoDeEnvio = "via roteador";
   }
 
@@ -163,7 +235,6 @@ function adicionarRotaLinear(rota, xAtual, yAtual, xDestino, yDestino) {
   }
 }
 
-// Encontra o roteador mais próximo
 function encontrarRoteadorMaisProximo(x, y) {
   let menorDistancia = Infinity;
   let roteadorMaisProximo = null;
@@ -181,7 +252,7 @@ function encontrarRoteadorMaisProximo(x, y) {
     }
   }
 
-  console.log('roteadorMaisProximo', roteadorMaisProximo)
+  console.log("roteadorMaisProximo", roteadorMaisProximo);
 
   return roteadorMaisProximo;
 }

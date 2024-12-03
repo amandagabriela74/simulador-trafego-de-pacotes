@@ -4,7 +4,10 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Rede de Pacotes</title>
-    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11.14.5/dist/sweetalert2.min.css" rel="stylesheet">
+    <link
+      href="https://cdn.jsdelivr.net/npm/sweetalert2@11.14.5/dist/sweetalert2.min.css"
+      rel="stylesheet"
+    />
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
@@ -19,10 +22,12 @@
       </select>
       <input type="number" id="x" placeholder="Linha" />
       <input type="number" id="y" placeholder="Coluna" />
-      <br>
+      <br />
       <button onclick="adicionarDispositivo()">Adicionar</button>
       <button onclick="limparRede()">Limpar Rede</button>
     </div>
+
+    <div class="grid" id="grid"></div>
 
     <div>
       <button onclick="salvarRede()">Salvar Rede</button>
@@ -31,7 +36,6 @@
     </div>
     <ul id="listaRedes"></ul>
 
-    <div class="grid" id="grid"></div>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.14.5/dist/sweetalert2.all.min.js"></script>
     <script src="scripts.js"></script>
   </body>
