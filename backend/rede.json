@@ -48,7 +48,21 @@
   ],
   null,
   null,
-  null,
+  [
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    {
+      "tipo": "roteador",
+      "ip": "6.6.6.6",
+      "mascara": "24"
+    }
+  ],
   [
     null,
     null,
