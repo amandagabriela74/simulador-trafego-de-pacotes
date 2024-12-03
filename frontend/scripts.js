@@ -239,6 +239,8 @@ function getIpPorCoordenada(x, y) {
 
 // Envia o pacote entre origem e destino
 async function enviarPacote(origem, destino) {
+  var quantidade = ''
+
   if (!origem || !destino) {
     alertWarning("Selecione tanto a origem quanto o destino.");
     return;
@@ -254,11 +256,16 @@ async function enviarPacote(origem, destino) {
     return;
   }
 
+  if (origem && destino) {
+    quantidade = prompt("Digite a quantidade de pacotes que você deseja enviar:");
+  }
+
+
   try {
     const response = await fetch(`${API_URL}/rede/pacote`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ origem, destino, quantidade: 10 }), // Quantidade de pacotes (ajustar conforme sua lógica)
+      body: JSON.stringify({ origem, destino, quantidade }),
     });
 
     if (response.ok) {
