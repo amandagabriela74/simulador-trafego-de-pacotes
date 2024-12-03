@@ -49,7 +49,22 @@
   null,
   null,
   null,
-  null,
+  [
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    {
+      "tipo": "smartphone",
+      "ip": "6.6.6.6",
+      "mascara": "8"
+    }
+  ],
   [
     {
       "tipo": "smartphone",
@@ -61,12 +76,16 @@
     null,
     null,
     null,
-    null,
-    null,
     {
       "tipo": "roteador",
-      "ip": "2.2.2.2",
-      "mascara": "8"
+      "ip": "1.1.1.1",
+      "mascara": "2"
+    },
+    null,
+    {
+      "tipo": "notebook",
+      "ip": "1.1.1.1",
+      "mascara": "2"
     }
   ]
 ]

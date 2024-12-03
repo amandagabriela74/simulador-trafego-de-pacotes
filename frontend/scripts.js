@@ -12,7 +12,7 @@ function criarGrade() {
     for (let j = 0; j < 10; j++) {
       const cell = document.createElement("div");
       cell.classList.add("cell");
-      cell.dataset.x = i; 
+      cell.dataset.x = i;
       cell.dataset.y = j;
 
       // Adiciona a célula na grid
@@ -79,15 +79,27 @@ async function adicionarDispositivo() {
   const y = parseInt(document.getElementById("y").value, 10);
 
   if (!ip || !tipo || !mascara || isNaN(x) || isNaN(y)) {
-    alert("Preencha todos os campos corretamente.");
+    alertWarning("Preencha todos os campos corretamente.");
     return;
   }
 
-  await fetch(`${API_URL}/rede/dispositivo`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ ip, tipo, mascara, x, y }),
-  });
+  try {
+    const response = await fetch(`${API_URL}/rede/dispositivo`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ip, tipo, mascara, x, y }),
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      alertSucess(data.mensagem);
+    } else {
+      const errorData = await response.json();
+      alertWarning(errorData.erro || "Erro desconhecido");
+    }
+  } catch (error) {
+    alertError("Erro ao criar dispositivo: " + error.message);
+  }
 
   atualizarGrid();
 }
@@ -97,38 +109,52 @@ async function salvarRede() {
   const nome = prompt("Digite um nome para salvar a rede:");
 
   if (!nome) {
-    alert("Você precisa fornecer um nome para salvar a rede.");
+    alertWarning("Você precisa fornecer um nome para salvar a rede.");
     return;
   }
 
-  const resposta = await fetch(`${API_URL}/rede/salvar`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ nome }),
-  });
+  try {
+    const resposta = await fetch(`${API_URL}/rede/salvar`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ nome }),
+    });
 
-  if (resposta.ok) {
-    alert("Rede salva com sucesso!");
-  } else {
-    const erro = await resposta.json();
-    alert(`Erro ao salvar a rede: ${erro.erro}`);
+    if (resposta.ok) {
+      alertSucess("Rede salva com sucesso!");
+    } else {
+      const erro = await resposta.json();
+      alertWarning(`Erro ao salvar a rede: ${erro.erro}`);
+    }
+  } catch (error) {
+    alertError("Erro ao salvar rede: " + error.message);
   }
 }
 
 // Listar redes salvas disponíveis
 async function listarRedesSalvas() {
-  const resposta = await fetch(`${API_URL}/rede/listar`);
-  const redes = await resposta.json();
+  try {
+    const resposta = await fetch(`${API_URL}/rede/listar`);
+    if (resposta.ok) {
+      const redes = await resposta.json();
+      const listaRedes = document.getElementById("listaRedes");
+      listaRedes.innerHTML = "";
 
-  const listaRedes = document.getElementById("listaRedes");
-  listaRedes.innerHTML = "";
+      redes.forEach((nome) => {
+        const item = document.createElement("li");
+        item.textContent = nome;
+        item.onclick = () => carregarRede(nome);
+        listaRedes.appendChild(item);
+      });
 
-  redes.forEach((nome) => {
-    const item = document.createElement("li");
-    item.textContent = nome;
-    item.onclick = () => carregarRede(nome);
-    listaRedes.appendChild(item);
-  });
+      alertSucess("Rede carregada com sucesso!");
+    } else {
+      const errorData = await response.json();
+      alertWarning(errorData.erro || "Erro desconhecido");
+    }
+  } catch (error) {
+    alertError("Erro ao listar redes salvas: " + error.message);
+  }
 }
 
 // Carregar uma rede salva pelo nome
@@ -138,11 +164,11 @@ async function carregarRede(nome) {
   );
   if (resposta.ok) {
     const dados = await resposta.json();
-    alert("Rede carregada com sucesso!");
+    alertSucess("Rede carregada com sucesso!");
     atualizarGrid();
   } else {
     const erro = await resposta.json();
-    alert(`Erro ao carregar a rede: ${erro.erro}`);
+    alertWarning(`Erro ao carregar a rede: ${erro.erro}`);
   }
 }
 
@@ -214,7 +240,7 @@ function getIpPorCoordenada(x, y) {
 // Envia o pacote entre origem e destino
 async function enviarPacote(origem, destino) {
   if (!origem || !destino) {
-    alert("Selecione tanto a origem quanto o destino.");
+    alertWarning("Selecione tanto a origem quanto o destino.");
     return;
   }
 
@@ -223,7 +249,8 @@ async function enviarPacote(origem, destino) {
   const destinoIp = getIpPorCoordenada(destino.x, destino.y);
 
   if (!origemIp || !destinoIp) {
-    alert("Endereço IP não encontrado.");
+    alertWarning("Endereço IP não encontrado.");
+    limparSelecaoVisual();
     return;
   }
 
@@ -237,13 +264,13 @@ async function enviarPacote(origem, destino) {
     if (response.ok) {
       const data = await response.json();
       animarTrajetoPacote(data.rota);
-      alert(data.mensagem);
+      alertSucess(data.mensagem);
     } else {
       const errorData = await response.json();
-      alert(errorData.erro || "Erro desconhecido");
+      alertWarning(errorData.erro || "Erro desconhecido");
     }
   } catch (error) {
-    alert("Erro ao enviar o pacote: " + error.message);
+    alertError("Erro ao enviar o pacote: " + error.message);
   }
 }
 
@@ -266,4 +293,60 @@ async function animarTrajetoPacote(rota) {
 
   // Limpar seleções visuais (origem e destino) após a animação
   limparSelecaoVisual();
+}
+
+// =========================== Alertas =========================== //
+
+function alertSucess(mensagem) {
+  const Toast = Swal.mixin({
+    toast: true,
+    position: "top-end",
+    showConfirmButton: false,
+    timer: 3000,
+    timerProgressBar: true,
+    didOpen: (toast) => {
+      toast.onmouseenter = Swal.stopTimer;
+      toast.onmouseleave = Swal.resumeTimer;
+    },
+  });
+  Toast.fire({
+    icon: "success",
+    title: mensagem,
+  });
+}
+
+function alertWarning(mensagem) {
+  const Toast = Swal.mixin({
+    toast: true,
+    position: "top-end",
+    showConfirmButton: false,
+    timer: 3000,
+    timerProgressBar: true,
+    didOpen: (toast) => {
+      toast.onmouseenter = Swal.stopTimer;
+      toast.onmouseleave = Swal.resumeTimer;
+    },
+  });
+  Toast.fire({
+    icon: "warning",
+    title: mensagem,
+  });
+}
+
+function alertError(mensagem) {
+  const Toast = Swal.mixin({
+    toast: true,
+    position: "top-end",
+    showConfirmButton: false,
+    timer: 3000,
+    timerProgressBar: true,
+    didOpen: (toast) => {
+      toast.onmouseenter = Swal.stopTimer;
+      toast.onmouseleave = Swal.resumeTimer;
+    },
+  });
+  Toast.fire({
+    icon: "error",
+    title: mensagem,
+  });
 }
