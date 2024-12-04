@@ -80,9 +80,12 @@ app.post("/rede/pacote", (req, res) => {
   const { origem, destino, quantidade } = req.body;
 
   if (
-    !origem || !destino ||
-    origem.x === undefined || origem.y === undefined ||
-    destino.x === undefined || destino.y === undefined ||
+    !origem ||
+    !destino ||
+    origem.x === undefined ||
+    origem.y === undefined ||
+    destino.x === undefined ||
+    destino.y === undefined ||
     !quantidade
   ) {
     return res.status(400).json({ erro: "Dados inválidos" });
@@ -96,7 +99,7 @@ app.post("/rede/pacote", (req, res) => {
   }
 
   try {
-    const { rota, tipoDeEnvio } = calcularRota(origem, destino, rede);
+    const { rota, tipoDeEnvio } = calcularRota(origem, destino, dispositivoOrigem, dispositivoDestino);
     const logPacotes = Array.from({ length: quantidade }, (_, i) => ({
       etapa: `Pacote ${i + 1}`,
       rota,
@@ -168,21 +171,40 @@ app.delete("/rede/excluir", (req, res) => {
 // =================== Funções auxiliares =================== //
 
 // Calcula a rota célula por célula entre origem e destino
-function calcularRota(origem, destino, rede) {
+// Calcula a rota célula por célula entre origem e destino
+function calcularRota(origem, destino, dispositivoOrigem, dispositivoDestino) {
   const { x: xOrigem, y: yOrigem } = origem;
   const { x: xDestino, y: yDestino } = destino;
 
   const rota = [{ x: xOrigem, y: yOrigem }];
   let tipoDeEnvio;
 
-  if (rede[xOrigem][yOrigem]?.mascara === rede[xDestino][yDestino]?.mascara) {
+  // Calcular as redes de origem e destino
+  const redeOrigem = calcularRede(
+    dispositivoOrigem.ip,
+    dispositivoOrigem.mascara
+  );
+  const redeDestino = calcularRede(
+    dispositivoDestino.ip,
+    dispositivoDestino.mascara
+  );
+
+  if (redeOrigem === redeDestino) {
     // Rota direta célula por célula
     adicionarRotaLinear(rota, xOrigem, yOrigem, xDestino, yDestino);
     tipoDeEnvio = "mesma rede";
   } else {
     // Busca os roteadores mais próximos
-    const roteadorOrigem = encontrarRoteadorMaisProximo(xOrigem, yOrigem);
-    const roteadorDestino = encontrarRoteadorMaisProximo(xDestino, yDestino);
+    const roteadorOrigem = encontrarRoteadorMaisProximo(
+      xOrigem,
+      yOrigem,
+      redeOrigem
+    );
+    const roteadorDestino = encontrarRoteadorMaisProximo(
+      xDestino,
+      yDestino,
+      redeDestino
+    );
 
     if (roteadorOrigem) {
       adicionarRotaLinear(
@@ -216,6 +238,28 @@ function calcularRota(origem, destino, rede) {
   return { rota, tipoDeEnvio };
 }
 
+function calcularRede(ip, mascara) {
+  const ipBinario = ip
+    .split(".")
+    .map((octeto) => parseInt(octeto, 10).toString(2).padStart(8, "0"))
+    .join(""); // Converte o IP para binário
+
+  const mascaraBinaria = "1".repeat(mascara) + "0".repeat(32 - mascara); // Máscara em binário
+
+  // Aplica operação AND bit a bit para calcular a rede
+  const redeBinaria = ipBinario
+    .split("")
+    .map((bit, index) =>
+      bit === "1" && mascaraBinaria[index] === "1" ? "1" : "0"
+    )
+    .join("");
+
+  // Converte a rede calculada para formato decimal (ex.: "192.168.1.0")
+  return Array.from({ length: 4 }, (_, i) =>
+    parseInt(redeBinaria.slice(i * 8, i * 8 + 8), 2)
+  ).join(".");
+}
+
 // Adiciona a rota célula por célula de forma linear (sem movimentos diagonais)
 function adicionarRotaLinear(rota, xAtual, yAtual, xDestino, yDestino) {
   // Movendo na direção horizontal primeiro
@@ -235,7 +279,7 @@ function adicionarRotaLinear(rota, xAtual, yAtual, xDestino, yDestino) {
   }
 }
 
-function encontrarRoteadorMaisProximo(x, y) {
+function encontrarRoteadorMaisProximo(x, y, redeDispositivo) {
   let menorDistancia = Infinity;
   let roteadorMaisProximo = null;
 
@@ -243,10 +287,16 @@ function encontrarRoteadorMaisProximo(x, y) {
     for (let j = 0; j < 10; j++) {
       const dispositivo = rede[i]?.[j];
       if (dispositivo?.tipo === "roteador") {
-        const distancia = Math.abs(x - i) + Math.abs(y - j);
-        if (distancia < menorDistancia) {
-          menorDistancia = distancia;
-          roteadorMaisProximo = { x: i, y: j };
+        // Calcula a rede do roteador
+        const redeRoteador = calcularRede(dispositivo.ip, dispositivo.mascara);
+
+        // Verifica se o dispositivo e o roteador estão na mesma rede
+        if (redeDispositivo === redeRoteador) {
+          const distancia = Math.abs(x - i) + Math.abs(y - j);
+          if (distancia < menorDistancia) {
+            menorDistancia = distancia;
+            roteadorMaisProximo = { x: i, y: j };
+          }
         }
       }
     }
