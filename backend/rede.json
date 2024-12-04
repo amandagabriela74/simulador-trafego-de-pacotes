@@ -6,7 +6,7 @@
     {
       "tipo": "roteador",
       "ip": "192.168.0.1",
-      "mascara": "26"
+      "mascara": "24"
     },
     null,
     null,
@@ -15,15 +15,15 @@
     null,
     {
       "tipo": "roteador",
-      "ip": "192.168.0.5",
-      "mascara": "3"
+      "ip": "192.168.0.254",
+      "mascara": "24"
     }
   ],
   [
     null,
     {
       "tipo": "smartphone",
-      "ip": "8.8.8.8",
+      "ip": "192.168.0.10",
       "mascara": "24"
     },
     null,
@@ -46,8 +46,8 @@
     null,
     {
       "tipo": "smartphone",
-      "ip": "192.168.0.5",
-      "mascara": "26"
+      "ip": "192.168.0.15",
+      "mascara": "24"
     },
     null
   ],
@@ -79,20 +79,11 @@
     null,
     null,
     null,
-    null,
-    null,
-    null,
-    null,
-    null,
-    null,
-    null
-  ],
-  [
-    null,
-    null,
-    null,
-    null,
-    null,
+    {
+      "tipo": "smartphone",
+      "ip": "192.168.1.5",
+      "mascara": "24"
+    },
     null,
     null,
     null,
@@ -122,9 +113,21 @@
     null,
     {
       "tipo": "roteador",
-      "ip": "8.8.8.8",
+      "ip": "192.168.1.1",
       "mascara": "24"
     },
+    null
+  ],
+  [
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
     null
   ],
   [

@@ -80,9 +80,12 @@ app.post("/rede/pacote", (req, res) => {
   const { origem, destino, quantidade } = req.body;
 
   if (
-    !origem || !destino ||
-    origem.x === undefined || origem.y === undefined ||
-    destino.x === undefined || destino.y === undefined ||
+    !origem ||
+    !destino ||
+    origem.x === undefined ||
+    origem.y === undefined ||
+    destino.x === undefined ||
+    destino.y === undefined ||
     !quantidade
   ) {
     return res.status(400).json({ erro: "Dados inválidos" });
@@ -96,18 +99,94 @@ app.post("/rede/pacote", (req, res) => {
   }
 
   try {
-    const { rota, tipoDeEnvio } = calcularRota(origem, destino, rede);
-    const logPacotes = Array.from({ length: quantidade }, (_, i) => ({
-      etapa: `Pacote ${i + 1}`,
-      rota,
-    }));
+    // Obter IPs e máscaras dos dispositivos
+    const ipOrigem = dispositivoOrigem.ip;
+    const ipDestino = dispositivoDestino.ip;
+    const mascaraOrigem = dispositivoOrigem.mascara || 24; // Assumir máscara padrão se não for especificada
+    const mascaraDestino = dispositivoDestino.mascara || 24;
 
-    res.json({
-      mensagem: `Os ${quantidade} pacotes foram enviados com sucesso.`,
-      log: logPacotes,
-      tipoDeEnvio,
-      rota,
-    });
+    // Calcular as redes de origem e destino
+    const redeOrigem = calcularRede(ipOrigem, mascaraOrigem);
+    const redeDestino = calcularRede(ipDestino, mascaraDestino);
+
+    const logPacotes = [];
+
+    // Verificar se estão na mesma sub-rede
+    if (redeOrigem === redeDestino) {
+      // Comunicação direta
+
+      const rota = calcularRota(origem, destino); // Calcula o caminho direto
+      
+
+      for (let i = 1; i <= quantidade; i++) {
+        logPacotes.push({
+          etapa: `Pacote ${i}`,
+          rota: rota.map((ponto) => ({
+            tipo: ponto.tipo,
+            x: ponto.x,
+            y: ponto.y,
+            ip: ponto.ip,
+          })),
+        });
+      }
+      return res.json({
+        mensagem: `Todos os ${quantidade} pacotes foram enviados diretamente. Mesma sub-rede.`,
+        log: logPacotes,
+        rota,
+      });
+    } else {
+      // Comunicação via roteador
+      // Caso os dispositivos não estejam na mesma sub-rede, identificar roteadores
+      const roteadorOrigem = encontrarRoteadorMaisProximo(
+        origem.x,
+        origem.y,
+        ipOrigem,
+        mascaraOrigem
+      );
+      const roteadorDestino = encontrarRoteadorMaisProximo(
+        destino.x,
+        destino.y,
+        ipOrigem,
+        mascaraDestino
+      );
+
+      console.log("rO", roteadorOrigem);
+      console.log("rO2", ipOrigem, mascaraOrigem);
+
+
+      if (!roteadorOrigem) {
+        return res.status(400).json({
+          erro: "Nenhum roteador na mesma sub-rede encontrado para a origem.",
+        });
+      }
+
+      if (!roteadorDestino) {
+        return res.status(400).json({
+          erro: "Nenhum roteador na mesma sub-rede encontrado para o destino.",
+        });
+      }
+
+      // Simular a passagem dos pacotes pelo roteador
+      const rota = calcularRota(origem, destino); // Função fictícia para determinar o caminho
+      for (let i = 1; i <= quantidade; i++) {
+        logPacotes.push({
+          etapa: `Pacote ${i}`,
+          rota: rota.map((ponto) => ({
+            tipo: ponto.tipo,
+            x: ponto.x,
+            y: ponto.y,
+            ip: ponto.ip,
+          })),
+        });
+      }
+
+      return res.json({
+        mensagem: `Os ${quantidade} pacotes foram enviados via roteadores.`,
+        log: logPacotes,
+        rota,
+      });
+    }
+
   } catch (erro) {
     res.status(400).json({ erro: erro.message });
   }
@@ -172,48 +251,52 @@ function calcularRota(origem, destino, rede) {
   const { x: xOrigem, y: yOrigem } = origem;
   const { x: xDestino, y: yDestino } = destino;
 
-  const rota = [{ x: xOrigem, y: yOrigem }];
-  let tipoDeEnvio;
+  // Para simplificar, vamos assumir uma rota em linha reta no momento
+  const rota = [];
 
-  if (rede[xOrigem][yOrigem]?.mascara === rede[xDestino][yDestino]?.mascara) {
-    // Rota direta célula por célula
-    adicionarRotaLinear(rota, xOrigem, yOrigem, xDestino, yDestino);
-    tipoDeEnvio = "mesma rede";
-  } else {
-    // Busca os roteadores mais próximos
-    const roteadorOrigem = encontrarRoteadorMaisProximo(xOrigem, yOrigem);
-    const roteadorDestino = encontrarRoteadorMaisProximo(xDestino, yDestino);
-
-    if (roteadorOrigem) {
-      adicionarRotaLinear(
-        rota,
-        xOrigem,
-        yOrigem,
-        roteadorOrigem.x,
-        roteadorOrigem.y
-      );
+  // Trajeto horizontal (movendo no eixo X)
+  if (xOrigem !== xDestino) {
+    const passoX = xOrigem < xDestino ? 1 : -1;
+    for (let x = xOrigem; x !== xDestino; x += passoX) {
+      rota.push({ x, y: yOrigem }); // Mantém a mesma linha (y)
     }
-    if (roteadorDestino && roteadorDestino !== roteadorOrigem) {
-      adicionarRotaLinear(
-        rota,
-        roteadorOrigem.x,
-        roteadorOrigem.y,
-        roteadorDestino.x,
-        roteadorDestino.y
-      );
-    }
-    adicionarRotaLinear(
-      rota,
-      roteadorDestino.x,
-      roteadorDestino.y,
-      xDestino,
-      yDestino
-    );
-
-    tipoDeEnvio = "via roteador";
   }
 
-  return { rota, tipoDeEnvio };
+  // Trajeto vertical (movendo no eixo Y)
+  if (yOrigem !== yDestino) {
+    const passoY = yOrigem < yDestino ? 1 : -1;
+    for (let y = yOrigem; y !== yDestino; y += passoY) {
+      rota.push({ x: xDestino, y }); // Alinha no eixo x já ajustado
+    }
+  }
+
+  // Adiciona o destino como último ponto
+  rota.push(destino);
+
+  return rota;
+}
+
+
+function calcularRede(ip, mascara) {
+  const ipBinario = ip
+    .split(".")
+    .map((octeto) => parseInt(octeto, 10).toString(2).padStart(8, "0"))
+    .join(""); // Converte o IP para binário
+
+  const mascaraBinaria = "1".repeat(mascara) + "0".repeat(32 - mascara); // Máscara em binário
+
+  // Aplica operação AND bit a bit para calcular a rede
+  const redeBinaria = ipBinario
+    .split("")
+    .map((bit, index) =>
+      bit === "1" && mascaraBinaria[index] === "1" ? "1" : "0"
+    )
+    .join("");
+
+  // Converte a rede calculada para formato decimal (ex.: "192.168.1.0")
+  return Array.from({ length: 4 }, (_, i) =>
+    parseInt(redeBinaria.slice(i * 8, i * 8 + 8), 2)
+  ).join(".");
 }
 
 // Adiciona a rota célula por célula de forma linear (sem movimentos diagonais)
@@ -235,26 +318,34 @@ function adicionarRotaLinear(rota, xAtual, yAtual, xDestino, yDestino) {
   }
 }
 
-function encontrarRoteadorMaisProximo(x, y) {
-  let menorDistancia = Infinity;
+function encontrarRoteadorMaisProximo(x, y, ipDispositivo, mascaraDispositivo) {
   let roteadorMaisProximo = null;
+  let menorDistancia = Infinity;
 
-  for (let i = 0; i < 10; i++) {
-    for (let j = 0; j < 10; j++) {
+  // Calcula a rede do dispositivo
+  const redeDispositivo = calcularRede(ipDispositivo, mascaraDispositivo);
+
+  for (let i = 0; i < rede.length; i++) {
+    for (let j = 0; j < (rede[i]?.length || 0); j++) {
       const dispositivo = rede[i]?.[j];
       if (dispositivo?.tipo === "roteador") {
-        const distancia = Math.abs(x - i) + Math.abs(y - j);
-        if (distancia < menorDistancia) {
-          menorDistancia = distancia;
-          roteadorMaisProximo = { x: i, y: j };
+        // Calcula a rede do roteador
+        const redeRoteador = calcularRede(dispositivo.ip, dispositivo.mascara);
+
+        // Verifica se o dispositivo e o roteador estão na mesma rede
+        if (redeDispositivo === redeRoteador) {
+          // Calcula a distância euclidiana
+          const distancia = Math.sqrt(Math.pow(x - i, 2) + Math.pow(y - j, 2));
+          if (distancia < menorDistancia) {
+            menorDistancia = distancia;
+            roteadorMaisProximo = dispositivo;
+          }
         }
       }
     }
   }
 
-  console.log("roteadorMaisProximo", roteadorMaisProximo);
-
-  return roteadorMaisProximo;
+  return roteadorMaisProximo; // Retorna o roteador mais próximo na mesma rede ou null
 }
 
 // =================== Inicialização do servidor =================== //
