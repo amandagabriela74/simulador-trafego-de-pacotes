@@ -1,11 +1,20 @@
 body {
   font-family: Arial, sans-serif;
   text-align: center;
-  margin: 20px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
+  margin: 0;
+  background: linear-gradient(45deg, #f5f7fae0, #d1e3f8d1, #e3f3ff, #e3f1f9d4);
+  background-size: 400% 400%; /* Faz o gradiente "se mover" */
+  animation: gradientMove 10s infinite; /* Aplica a animação */
+}
+
+h3, p {
+  margin: 0;
+}
+
+@keyframes gradientMove {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
 }
 
 #formulario {
@@ -33,18 +42,20 @@ body {
 }
 
 .smartphone {
-  background-color: #cce5ff;
+  background-color: #96caff;
 }
 
 .notebook {
-  background-color: #b4ffc6;
+  background-color: #73db8c;
 }
 
 .roteador {
   background-color: #f8d7da;
 }
 
-.smartphone, .notebook, .roteador{
+.smartphone,
+.notebook,
+.roteador {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -82,17 +93,13 @@ body {
   }
 }
 
-
-
-
 .icon {
   width: 30px; /* Ajuste conforme necessário */
   height: 30px;
   object-fit: contain; /* Garante que a imagem mantenha sua proporção */
 }
 
-
-
+/* 
 #formulario {
   background-color: #fff;
   padding: 20px;
@@ -135,4 +142,78 @@ body {
 
 #formulario button:active {
   background-color: #003366;
+}
+ */
+
+#actions-buttons {
+  position: relative;
+  left: 78rem;
+  top: 4rem;
+  width: 20rem;
+}
+
+#formulario-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  margin-top: 1rem;
+}
+
+#formulario {
+  display: none; /* O formulário estará oculto por padrão */
+  flex-direction: column;
+  align-items: baseline;
+  gap: .85rem;
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  border: 1px solid #ebebeb;
+}
+
+#formulario input,
+#formulario select,
+#formulario button {
+  width: 80%;
+  padding: 10px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+#formulario button {
+  background-color: #0056b3;
+  color: #fff;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+#formulario button:hover {
+  background-color: #004494;
+}
+
+#buttons{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  position: relative;
+  bottom: 30rem;
+  left: 5rem;
+  width: 30rem;
+}
+
+.button {
+  height: 3rem;
+  width: 12rem;
+  padding: 10px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  background-color: #0056b3;
+  color: #fff;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
 }

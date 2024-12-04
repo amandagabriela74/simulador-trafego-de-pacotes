@@ -11,28 +11,45 @@
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
-    <h1>Rede de Pacotes</h1>
-    <div id="formulario">
-      <input type="text" id="ip" placeholder="Endereço IP" />
-      <input type="text" id="mascara" placeholder="Mascara da rede" />
-      <select id="tipo">
-        <option value="smartphone">Smartphone</option>
-        <option value="notebook">Notebook</option>
-        <option value="roteador">Roteador</option>
-      </select>
-      <input type="number" id="x" placeholder="Linha" />
-      <input type="number" id="y" placeholder="Coluna" />
-      <br />
-      <button onclick="adicionarDispositivo()">Adicionar</button>
-      <button onclick="limparRede()">Limpar Rede</button>
+    <div id="actions-buttons">
+      <button class="button" onclick="toggleFormulario()">
+        Adicionar Dispositivo
+      </button>
+    </div>
+    <header>
+      <h1>Simulador de Tráfego de Pacotes</h1>
+      <p>Crie sua rede, adicione dispositivos e simule o envio de pacotes.</p>
+    </header>
+
+    <div id="formulario-wrapper">
+      <div id="formulario" style="display: none">
+        <p>
+          Preencha as informações do novo dispositivo que deseja adicionar à
+          rede:
+        </p>
+        <div style="display: flex; gap: 1rem">
+          <input type="text" id="ip" placeholder="Endereço IP" />
+          <input type="text" id="mascara" placeholder="Máscara da Rede" />
+          <select id="tipo">
+            <option value="smartphone">Smartphone</option>
+            <option value="notebook">Notebook</option>
+            <option value="roteador">Roteador</option>
+          </select>
+          <input type="number" id="x" placeholder="Linha" />
+          <input type="number" id="y" placeholder="Coluna" />
+          <button onclick="adicionarDispositivo()">Confirmar</button>
+        </div>
+      </div>
     </div>
 
     <div class="grid" id="grid"></div>
 
-    <div>
-      <button onclick="salvarRede()">Salvar Rede</button>
-      <button onclick="listarRedesSalvas()">Listar Redes Salvas</button>
-      <button onclick="limparRede()">Limpar Rede</button>
+    <div id="buttons">
+      <h3>Gerenciamento da Rede</h3>
+      <p>Use os botões abaixo para configurar a sua rede:</p>
+      <button class="button" onclick="listarRedesSalvas()">Listar Redes Salvas</button>
+      <button class="button" onclick="salvarRede()">Salvar Rede</button>
+      <button class="button" onclick="limparRede()">Limpar Rede</button>
     </div>
     <ul id="listaRedes"></ul>
 

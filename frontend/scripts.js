@@ -92,6 +92,7 @@ async function adicionarDispositivo() {
     if (response.ok) {
       const data = await response.json();
       alertSucess(data.mensagem);
+      toggleFormulario();
     } else {
       const errorData = await response.json();
       alertWarning(errorData.erro || "Erro desconhecido");
@@ -300,6 +301,12 @@ async function animarTrajetoPacote(rota) {
   // Limpar seleções visuais (origem e destino) após a animação
   limparSelecaoVisual();
 }
+
+function toggleFormulario() {
+  const formulario = document.getElementById('formulario');
+  formulario.style.display = formulario.style.display === 'none' ? 'flex' : 'none';
+}
+
 
 // =========================== Alertas =========================== //
 

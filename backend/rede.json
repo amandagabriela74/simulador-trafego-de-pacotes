@@ -1,89 +1,12 @@
 [
-  null,
   [
-    null,
-    {
-      "tipo": "smartphone",
-      "ip": "192.168.1.10",
-      "mascara": "24"
-    },
-    {
-      "tipo": "notebook",
-      "ip": "192.168.1.20",
-      "mascara": "24"
-    },
-    null,
-    {
-      "tipo": "smartphone",
-      "ip": "2.2.2.2",
-      "mascara": "12"
-    }
-  ],
-  [
-    null,
     null,
     null,
     null,
     {
       "tipo": "roteador",
-      "ip": "192.5.4.3",
-      "mascara": "24"
-    }
-  ],
-  [
-    null,
-    null,
-    null,
-    null,
-    {
-      "tipo": "smartphone",
-      "ip": "2.2.2.2",
-      "mascara": "12"
-    },
-    {
-      "tipo": "smartphone",
-      "ip": "1.1.1.2",
-      "mascara": "8"
-    }
-  ],
-  null,
-  null,
-  [
-    null,
-    null,
-    null,
-    null,
-    null,
-    null,
-    null,
-    null,
-    {
-      "tipo": "roteador",
-      "ip": "6.6.6.6",
-      "mascara": "24"
-    }
-  ],
-  [
-    null,
-    null,
-    null,
-    null,
-    null,
-    null,
-    null,
-    null,
-    null,
-    {
-      "tipo": "smartphone",
-      "ip": "6.6.6.6",
-      "mascara": "8"
-    }
-  ],
-  [
-    {
-      "tipo": "smartphone",
-      "ip": "12.12.12.12",
-      "mascara": "22"
+      "ip": "192.168.0.1",
+      "mascara": "26"
     },
     null,
     null,
@@ -92,14 +15,128 @@
     null,
     {
       "tipo": "roteador",
-      "ip": "1.1.1.1",
-      "mascara": "2"
-    },
+      "ip": "192.168.0.5",
+      "mascara": "3"
+    }
+  ],
+  [
     null,
     {
-      "tipo": "notebook",
-      "ip": "1.1.1.1",
-      "mascara": "2"
-    }
+      "tipo": "smartphone",
+      "ip": "8.8.8.8",
+      "mascara": "24"
+    },
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null
+  ],
+  [
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    {
+      "tipo": "smartphone",
+      "ip": "192.168.0.5",
+      "mascara": "26"
+    },
+    null
+  ],
+  [
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null
+  ],
+  [
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null
+  ],
+  [
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null
+  ],
+  [
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null
+  ],
+  [
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null
+  ],
+  [
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    {
+      "tipo": "roteador",
+      "ip": "8.8.8.8",
+      "mascara": "24"
+    },
+    null
+  ],
+  [
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null
   ]
 ]
