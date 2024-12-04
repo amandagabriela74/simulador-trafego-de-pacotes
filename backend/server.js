@@ -99,14 +99,19 @@ app.post("/rede/pacote", (req, res) => {
   }
 
   try {
-    const { rota, tipoDeEnvio } = calcularRota(origem, destino, dispositivoOrigem, dispositivoDestino);
+    const { rota, tipoDeEnvio } = calcularRota(
+      origem,
+      destino,
+      dispositivoOrigem,
+      dispositivoDestino
+    );
     const logPacotes = Array.from({ length: quantidade }, (_, i) => ({
       etapa: `Pacote ${i + 1}`,
       rota,
     }));
 
     res.json({
-      mensagem: `Os ${quantidade} pacotes foram enviados com sucesso.`,
+      mensagem: `Os ${quantidade} pacotes foram enviados com sucesso`,
       log: logPacotes,
       tipoDeEnvio,
       rota,
@@ -192,7 +197,7 @@ function calcularRota(origem, destino, dispositivoOrigem, dispositivoDestino) {
   if (redeOrigem === redeDestino) {
     // Rota direta célula por célula
     adicionarRotaLinear(rota, xOrigem, yOrigem, xDestino, yDestino);
-    tipoDeEnvio = "mesma rede";
+    tipoDeEnvio = "mesma rede.";
   } else {
     // Busca os roteadores mais próximos
     const roteadorOrigem = encontrarRoteadorMaisProximo(
@@ -232,7 +237,7 @@ function calcularRota(origem, destino, dispositivoOrigem, dispositivoDestino) {
       yDestino
     );
 
-    tipoDeEnvio = "via roteador";
+    tipoDeEnvio = "via roteador.";
   }
 
   return { rota, tipoDeEnvio };
@@ -303,6 +308,11 @@ function encontrarRoteadorMaisProximo(x, y, redeDispositivo) {
   }
 
   console.log("roteadorMaisProximo", roteadorMaisProximo);
+
+  // Validação: se nenhum roteador for encontrado
+  if (!roteadorMaisProximo) {
+    throw new Error("Nenhum roteador está na mesma rede que o dispositivo.");
+  }
 
   return roteadorMaisProximo;
 }

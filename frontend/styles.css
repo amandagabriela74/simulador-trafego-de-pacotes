@@ -205,7 +205,24 @@ h3, p {
   width: 30rem;
 }
 
-.button {
+#redes-salvas{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  position: relative;
+  bottom: 41rem;
+  left: 85rem;
+  width: 30rem;
+}
+
+#listaRedes{
+  display: flex;
+  flex-direction: column;
+}
+
+button {
   height: 3rem;
   width: 12rem;
   padding: 10px;
@@ -216,4 +233,31 @@ h3, p {
   color: #fff;
   cursor: pointer;
   transition: background-color 0.3s ease;
+}
+
+
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+
+th, td {
+  border: 1px solid #ddd;
+  padding: 10px;
+  text-align: left;
+}
+
+th {
+  background-color: #f4f4f4;
+}
+
+tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+tr:hover {
+  background-color: #f1f1f1;
+  cursor: pointer;
 }

@@ -141,7 +141,7 @@ async function listarRedesSalvas() {
       listaRedes.innerHTML = "";
 
       redes.forEach((nome) => {
-        const item = document.createElement("li");
+        const item = document.createElement("button");
         item.textContent = nome;
         item.onclick = () => carregarRede(nome);
         listaRedes.appendChild(item);
@@ -156,6 +156,9 @@ async function listarRedesSalvas() {
     alertError("Erro ao listar redes salvas: " + error.message);
   }
 }
+
+// Executa automaticamente ao carregar a página
+document.addEventListener("DOMContentLoaded", listarRedesSalvas);
 
 // Carregar uma rede salva pelo nome
 async function carregarRede(nome) {
@@ -271,7 +274,7 @@ async function enviarPacote(origem, destino) {
     if (response.ok) {
       const data = await response.json();
       animarTrajetoPacote(data.rota);
-      alertSucess(data.mensagem);
+      alertSucess(data.mensagem + ` - ` + data.tipoDeEnvio);
     } else {
       const errorData = await response.json();
       alertWarning(errorData.erro || "Erro desconhecido");

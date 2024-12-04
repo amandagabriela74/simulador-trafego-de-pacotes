@@ -47,11 +47,17 @@
     <div id="buttons">
       <h3>Gerenciamento da Rede</h3>
       <p>Use os botões abaixo para configurar a sua rede:</p>
-      <button class="button" onclick="listarRedesSalvas()">Listar Redes Salvas</button>
+      <!-- <button class="button" onclick="listarRedesSalvas()">Listar Redes Salvas</button> -->
       <button class="button" onclick="salvarRede()">Salvar Rede</button>
       <button class="button" onclick="limparRede()">Limpar Rede</button>
     </div>
-    <ul id="listaRedes"></ul>
+    <!-- <ul id="listaRedes"></ul> -->
+
+    <div id="redes-salvas">
+      <h3>Redes Salvas</h3>
+      <p>Selecione uma rede para carregá-la e visualizar os dispositivos.</p>
+      <div id="listaRedes"></div>
+    </div>
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.14.5/dist/sweetalert2.all.min.js"></script>
     <script src="scripts.js"></script>
